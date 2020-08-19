@@ -25,6 +25,8 @@ abstract class BaseFixture extends Fixture
      * @var [Generator]
      */
     protected $faker;
+    /**@var array Liste des reférences connues */
+    private $refences = [];
 
     /**
      * Méthode à implémenter par les classes qui héritent
@@ -51,10 +53,11 @@ abstract class BaseFixture extends Fixture
     /**
      * Enregistrer plusieurs entités
      * @param int $count            nombre d'entités à générer
+     * @param string $groupName     nom du groupe de références
      * @param callable $factory     fonction qui genère 1 entité
      */
 
-     protected function createMany( int $count, callable $factory)
+     protected function createMany( int $count, string $groupName, callable $factory)
      {
          for($i =0; $i < $count; $i++)
          {
@@ -69,6 +72,47 @@ abstract class BaseFixture extends Fixture
 
             // On prépare à l'enregistrement de l'entité
             $this->manager->persist($entity) ;
+
+            //Enregistre une référence à l'entité
+            $refences = sprintf('%s_%d', $groupName, $i);
+            $this->addReference($refences, $entity);
          }
      }
+
+     /**
+      * Recuperer 1 entié par son nom de groupe de références
+      * @param string $groupName nom de groupe de reférences
+      */
+    protected function getRandomReference(string $groupName)
+    {
+        //Vereifier si on a déja enregistré les réfences du groupe demandé
+        if(!isset($this->reference[$groupName])) 
+        {
+            // si non , on va rechercher les références
+            $this->refences[$groupName] = [];
+
+            // On parcourt la liste de toutes les références (toutes classe confondues)
+            foreach ($this->referenceRepository->getReferences() as $key => $ref)
+            {
+                // la clé $key correspond à nos réferences
+                // si $key commence par $groupName , on le sauvegarde
+                if(strpos($key, $groupName) === 0)
+                {
+                    $this->refences[$groupName][]= $key;
+                }
+            }
+        }
+
+        // Vérifier que l'on a récupèré des réfèrences
+        if($this->refences[$groupName] === [])
+        {
+            throw new \Exception(sprintf('Aucune référence trouvée pour le groupe "%s"', $groupName));
+        }
+
+        // Retourner une entité correspondant à une référence aléatoire
+        $randomReference = $this->faker->randomElement($this->refences[$groupName]);
+        return $this->getReference($randomReference);
+    } 
+    
 }
+
