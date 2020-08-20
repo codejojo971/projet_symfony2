@@ -47,4 +47,18 @@ class RecordRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    /**
+     * Nouveautés: albums sortis il y a moins d'un mois
+     */
+    public function findNews()
+    {
+
+        return $this->createQueryBuilder('r')       // r = alias de Record
+            ->where('r.releasedAt >= :Last_month')
+            ->setParameter('Last_month', new \DateTime('-1 month'))
+            ->orderBy('r.releasedAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }
