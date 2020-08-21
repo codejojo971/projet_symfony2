@@ -1,0 +1,18 @@
+<?php
+
+namespace App\DataFixtures;
+
+use App\Entity\Label;
+
+class LabelFixtures extends BaseFixture
+{
+
+    protected function loadData()
+    {
+        $this->createMany(5,'label', function(){
+            return (new Label())
+                ->setName($this->faker->lastName . ' Productions')
+                ;
+        });
+    }
+}
