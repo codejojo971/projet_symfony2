@@ -27,10 +27,11 @@
                 <a class="navbar-item" href="{{ path('artist_list') }}">
                     Artistes
                 </a>
-
+                 {#{% if is_granted("ROLE_ADMIN") %}#}
                 <a class="navbar-item" href="{{ path('record_news') }}">
                     Nouveautés
                 </a>
+                {#{% endif %}#}
             </div>
 
             <div class="navbar-end">
